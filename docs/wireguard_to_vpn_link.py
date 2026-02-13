@@ -133,25 +133,26 @@ def wireguard_to_vpn_link(config: Dict[str, Any]) -> str:
     if has_awg_params:
         awg_params = {}
         
-        # Вспомогательная функция для безопасного преобразования в int
-        def safe_int(val):
+        # Вспомогательная функция для преобразования в int (если еще не int)
+        def ensure_int(val):
+            """Преобразует значение в int, если оно не None и еще не является int."""
             return int(val) if val is not None and not isinstance(val, int) else val
         
         # Числовые параметры
         if jc is not None:
-            awg_params["Jc"] = safe_int(jc)
+            awg_params["Jc"] = ensure_int(jc)
         if jmin is not None:
-            awg_params["Jmin"] = safe_int(jmin)
+            awg_params["Jmin"] = ensure_int(jmin)
         if jmax is not None:
-            awg_params["Jmax"] = safe_int(jmax)
+            awg_params["Jmax"] = ensure_int(jmax)
         if s1 is not None:
-            awg_params["S1"] = safe_int(s1)
+            awg_params["S1"] = ensure_int(s1)
         if s2 is not None:
-            awg_params["S2"] = safe_int(s2)
+            awg_params["S2"] = ensure_int(s2)
         if s3 is not None:
-            awg_params["S3"] = safe_int(s3)
+            awg_params["S3"] = ensure_int(s3)
         if s4 is not None:
-            awg_params["S4"] = safe_int(s4)
+            awg_params["S4"] = ensure_int(s4)
         
         # H1-H4 могут быть в формате диапазона (строка) или числом
         for h_key, h_val in [('H1', h1), ('H2', h2), ('H3', h3), ('H4', h4)]:
@@ -159,6 +160,7 @@ def wireguard_to_vpn_link(config: Dict[str, Any]) -> str:
                 awg_params[h_key] = str(h_val)
         
         # I1-I5 - специальные паттерны (обычно пустые строки или значения)
+        # ВАЖНО: пустые строки - это валидные значения и должны быть включены
         for i_key, i_val in [('I1', i1), ('I2', i2), ('I3', i3), ('I4', i4), ('I5', i5)]:
             if i_val is not None:
                 awg_params[i_key] = str(i_val)

@@ -425,6 +425,9 @@ def create_vpn_link(private_key, client_ip, server_pubkey, preshared_key,
                     i1="", i2="", i3="", i4="", i5=""):
     """
     Создать vpn:// ссылку из параметров AmneziaWG.
+    
+    Значения по умолчанию взяты из реальной конфигурации self-hosted Amnezia
+    и находятся в рекомендуемых диапазонах для обхода блокировок.
     """
     
     # Создать JSON структуру Amnezia
