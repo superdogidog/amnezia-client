@@ -88,15 +88,22 @@ def wireguard_to_vpn_link(config: Dict[str, Any]) -> str:
     endpoint = peer.get('Endpoint', ':51820')
     
     # AmneziaWG специфичные параметры
-    jc = int(interface.get('Jc', 6))
-    jmin = int(interface.get('Jmin', 10))
-    jmax = int(interface.get('Jmax', 50))
-    s1 = int(interface.get('S1', 123))
-    s2 = int(interface.get('S2', 136))
-    h1 = int(interface.get('H1', 1043813656))
-    h2 = int(interface.get('H2', 1394807736))
-    h3 = int(interface.get('H3', 850386757))
-    h4 = int(interface.get('H4', 714960491))
+    jc = interface.get('Jc')
+    jmin = interface.get('Jmin')
+    jmax = interface.get('Jmax')
+    s1 = interface.get('S1')
+    s2 = interface.get('S2')
+    s3 = interface.get('S3')
+    s4 = interface.get('S4')
+    h1 = interface.get('H1')
+    h2 = interface.get('H2')
+    h3 = interface.get('H3')
+    h4 = interface.get('H4')
+    i1 = interface.get('I1', '')
+    i2 = interface.get('I2', '')
+    i3 = interface.get('I3', '')
+    i4 = interface.get('I4', '')
+    i5 = interface.get('I5', '')
     
     # Парсим endpoint
     if ':' in endpoint:
@@ -106,7 +113,7 @@ def wireguard_to_vpn_link(config: Dict[str, Any]) -> str:
         port = '51820'
     
     # Определяем тип контейнера на основе наличия AmneziaWG параметров
-    has_awg_params = any(key in interface for key in ['Jc', 'Jmin', 'Jmax', 'S1', 'S2', 'H1', 'H2', 'H3', 'H4'])
+    has_awg_params = any(key in interface for key in ['Jc', 'Jmin', 'Jmax', 'S1', 'S2', 'S3', 'S4', 'H1', 'H2', 'H3', 'H4', 'I1', 'I2', 'I3', 'I4', 'I5'])
     container_type = "amnezia-awg" if has_awg_params else "amnezia-wg"
     protocol_key = "awg" if has_awg_params else "wireguard"
     
@@ -124,17 +131,41 @@ def wireguard_to_vpn_link(config: Dict[str, Any]) -> str:
     
     # Добавляем AmneziaWG параметры если есть
     if has_awg_params:
-        protocol_config.update({
-            "Jc": jc,
-            "Jmin": jmin,
-            "Jmax": jmax,
-            "S1": s1,
-            "S2": s2,
-            "H1": str(h1),
-            "H2": str(h2),
-            "H3": str(h3),
-            "H4": str(h4)
-        })
+        awg_params = {}
+        
+        # Вспомогательная функция для преобразования в int (если еще не int)
+        def ensure_int(val):
+            """Преобразует значение в int, если оно не None и еще не является int."""
+            return int(val) if val is not None and not isinstance(val, int) else val
+        
+        # Числовые параметры
+        if jc is not None:
+            awg_params["Jc"] = ensure_int(jc)
+        if jmin is not None:
+            awg_params["Jmin"] = ensure_int(jmin)
+        if jmax is not None:
+            awg_params["Jmax"] = ensure_int(jmax)
+        if s1 is not None:
+            awg_params["S1"] = ensure_int(s1)
+        if s2 is not None:
+            awg_params["S2"] = ensure_int(s2)
+        if s3 is not None:
+            awg_params["S3"] = ensure_int(s3)
+        if s4 is not None:
+            awg_params["S4"] = ensure_int(s4)
+        
+        # H1-H4 могут быть в формате диапазона (строка) или числом
+        for h_key, h_val in [('H1', h1), ('H2', h2), ('H3', h3), ('H4', h4)]:
+            if h_val is not None:
+                awg_params[h_key] = str(h_val)
+        
+        # I1-I5 - специальные паттерны (обычно пустые строки или значения)
+        # ВАЖНО: пустые строки - это валидные значения и должны быть включены
+        for i_key, i_val in [('I1', i1), ('I2', i2), ('I3', i3), ('I4', i4), ('I5', i5)]:
+            if i_val is not None:
+                awg_params[i_key] = str(i_val)
+        
+        protocol_config.update(awg_params)
     
     # Создаем JSON структуру Amnezia
     server_config = {
