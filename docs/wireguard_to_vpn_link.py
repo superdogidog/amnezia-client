@@ -132,20 +132,26 @@ def wireguard_to_vpn_link(config: Dict[str, Any]) -> str:
     # Добавляем AmneziaWG параметры если есть
     if has_awg_params:
         awg_params = {}
+        
+        # Вспомогательная функция для безопасного преобразования в int
+        def safe_int(val):
+            return int(val) if val is not None and not isinstance(val, int) else val
+        
+        # Числовые параметры
         if jc is not None:
-            awg_params["Jc"] = int(jc) if not isinstance(jc, int) else jc
+            awg_params["Jc"] = safe_int(jc)
         if jmin is not None:
-            awg_params["Jmin"] = int(jmin) if not isinstance(jmin, int) else jmin
+            awg_params["Jmin"] = safe_int(jmin)
         if jmax is not None:
-            awg_params["Jmax"] = int(jmax) if not isinstance(jmax, int) else jmax
+            awg_params["Jmax"] = safe_int(jmax)
         if s1 is not None:
-            awg_params["S1"] = int(s1) if not isinstance(s1, int) else s1
+            awg_params["S1"] = safe_int(s1)
         if s2 is not None:
-            awg_params["S2"] = int(s2) if not isinstance(s2, int) else s2
+            awg_params["S2"] = safe_int(s2)
         if s3 is not None:
-            awg_params["S3"] = int(s3) if not isinstance(s3, int) else s3
+            awg_params["S3"] = safe_int(s3)
         if s4 is not None:
-            awg_params["S4"] = int(s4) if not isinstance(s4, int) else s4
+            awg_params["S4"] = safe_int(s4)
         
         # H1-H4 могут быть в формате диапазона (строка) или числом
         for h_key, h_val in [('H1', h1), ('H2', h2), ('H3', h3), ('H4', h4)]:
